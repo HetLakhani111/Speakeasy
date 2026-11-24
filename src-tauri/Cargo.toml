@@ -1,0 +1,74 @@
+[package]
+name = "speakeasy"
+version = "0.1.0"
+description = "Push-to-talk voice transcription. Local, private, free."
+authors = ["Speakeasy contributors"]
+edition = "2021"
+rust-version = "1.88"
+license = "MIT"
+repository = "https://github.com/speakeasy-app/speakeasy"
+
+[lib]
+name = "speakeasy_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon", "image-png"] }
+tauri-plugin-autostart = "2"
+tauri-plugin-clipboard-manager = "2.5.0"
+tauri-plugin-dialog = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+parking_lot = "0.12"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tracing-appender = "0.2"
+cpal = "0.17"
+hound = "3.5"
+realfft = "3.5"
+crossbeam-channel = "0.5"
+global-hotkey = "0.10"
+enigo = "0.6.1"
+sha2 = "0.10"
+ureq = "2"
+whisper-rs = "0.16.0"
+
+# Optional GPU backends for Windows/Linux. On Windows the Vulkan backend is
+# compiled in by default (see the target-specific dependency below) so the app
+# can use the GPU when one is present and fall back to the CPU when it is not.
+# The default CPU build always works; `--features cuda` opts into CUDA instead.
+[features]
+default = []
+vulkan = ["whisper-rs/vulkan"]
+cuda = ["whisper-rs/cuda"]
+# Development-only: replay a WAV file as the microphone input. Never enabled in
+# shipped builds; it exists so transcription and pasting can be verified on a
+# machine without a usable microphone.
+dev-wav = []
+
+[target.'cfg(target_os = "windows")'.dependencies]
+# Vulkan ships in every Windows build. Without a Vulkan-capable GPU (or a
+# missing driver) whisper-rs falls back to the CPU at runtime, so this costs
+# nothing on machines that cannot use it.
+whisper-rs = { version = "0.16.0", features = ["vulkan"] }
+# System output mute (IAudioEndpointVolume), the modifier-key hook, and the
+# ShellExecuteW call that opens Windows privacy settings.
+windows = { version = "0.62", features = [
+  "Win32_Foundation",
+  "Win32_Media_Audio",
+  "Win32_Media_Audio_Endpoints",
+  "Win32_System_Com",
+  "Win32_System_Com_StructuredStorage",
+  "Win32_System_Threading",
+  "Win32_UI_Shell",
+  "Win32_UI_WindowsAndMessaging",
+] }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+core-foundation = "0.10"
+core-graphics = "0.24"
+whisper-rs = { version = "0.16.0", features = ["metal"] }
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }

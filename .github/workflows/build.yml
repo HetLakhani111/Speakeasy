@@ -1,0 +1,115 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS arm64
+            platform: macos-14
+            target_dir: /tmp/speakeasy-target
+            bundle: dmg
+          - name: Windows x64
+            platform: windows-latest
+            # Keep the target directory short: whisper.cpp's Vulkan shader build
+            # generates paths that can pass MAX_PATH under a deep workspace.
+            target_dir: D:/t
+            bundle: nsis
+    env:
+      CARGO_TARGET_DIR: ${{ matrix.target_dir }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      # Only the registry is cached: the build uses a custom target directory,
+      # so a target cache would not line up with the default location.
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: cargo-${{ runner.os }}-${{ hashFiles('src-tauri/Cargo.lock') }}
+          restore-keys: cargo-${{ runner.os }}-
+
+      - name: Locate Windows native toolchains
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          # The Windows images usually ship the Vulkan SDK under C:\VulkanSDK
+          # without exporting VULKAN_SDK. whisper-rs needs it for the GPU
+          # backend; install it when the image does not carry it.
+          $vulkan = Get-ChildItem 'C:\VulkanSDK' -Directory -ErrorAction SilentlyContinue |
+            Sort-Object Name -Descending | Select-Object -First 1
+          if (-not $vulkan) {
+            Write-Host "Vulkan SDK not found; installing it with Chocolatey."
+            choco install vulkan-sdk -y --no-progress
+            $vulkan = Get-ChildItem 'C:\VulkanSDK' -Directory -ErrorAction SilentlyContinue |
+              Sort-Object Name -Descending | Select-Object -First 1
+          }
+          if ($vulkan) {
+            "VULKAN_SDK=$($vulkan.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Append
+            Write-Host "VULKAN_SDK=$($vulkan.FullName)"
+          } else {
+            throw "The Vulkan SDK is required for the Windows GPU backend."
+          }
+
+          if (-not $env:LIBCLANG_PATH -and (Test-Path 'C:\Program Files\LLVM\bin\libclang.dll')) {
+            "LIBCLANG_PATH=C:\Program Files\LLVM\bin" | Out-File -FilePath $env:GITHUB_ENV -Append
+            Write-Host "LIBCLANG_PATH=C:\Program Files\LLVM\bin"
+          }
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Build the app and its installers
+        run: npm run tauri build
+
+      - name: Upload bundles
+        uses: actions/upload-artifact@v4
+        with:
+          name: speakeasy-${{ matrix.bundle }}
+          if-no-files-found: error
+          path: |
+            ${{ matrix.target_dir }}/release/bundle/${{ matrix.bundle }}/*
+            ${{ matrix.target_dir }}/release/bundle/msi/*
+
+  release:
+    name: Publish release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/**/*
+          generate_release_notes: true

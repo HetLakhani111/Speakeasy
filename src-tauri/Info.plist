@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>NSMicrophoneUsageDescription</key>
+  <string>Speakeasy records your voice only while you hold the dictation hotkey. Audio is transcribed on this Mac and never uploaded.</string>
+  <key>NSAppleEventsUsageDescription</key>
+  <string>Speakeasy sends a paste keystroke to the app you are typing in so your transcription appears there.</string>
+  <key>NSAccessibilityUsageDescription</key>
+  <string>Speakeasy needs Accessibility access to notice the dictation hotkey and paste transcribed text into the focused app.</string>
+  <key>LSUIElement</key>
+  <true/>
+</dict>
+</plist>

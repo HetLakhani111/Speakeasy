@@ -1,0 +1,13 @@
+# Native code that whisper-rs-sys compiles through CMake (whisper.cpp and
+# ggml) must be optimized, or dictation takes minutes instead of a second.
+#
+# cmake-rs overwrites CMAKE_C_FLAGS_RELEASE / CMAKE_CXX_FLAGS_RELEASE for MSVC
+# with only its runtime flags, which drops CMake's default /O2 and leaves the
+# inference engine unoptimized. whisper-rs-sys forwards every CMAKE_* variable
+# from the environment into CMake, so the optimization flags are supplied here.
+#
+# The flags use the "-" prefix, which both cl.exe and clang accept, so this
+# file also works for macOS builds.
+[env]
+CMAKE_C_FLAGS = "-O2 -DNDEBUG"
+CMAKE_CXX_FLAGS = "-O2 -DNDEBUG"

@@ -191,11 +191,12 @@ smaller model on slower hardware.
 
 ## License
 
-GNU General Public License v3.0. Copyright © 2026 Speakeasy contributors.
+GNU General Public License v3.0 or later. Copyright © 2026 Speakeasy contributors.
 
 Speakeasy is free software: you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
-Foundation, version 3 of the License.
+Foundation, either version 3 of the License, or (at your option) any later
+version.
 
 Speakeasy is distributed in the hope that it will be useful, but **without any
 warranty**; without even the implied warranty of merchantability or fitness for

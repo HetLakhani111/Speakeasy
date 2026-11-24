@@ -5,7 +5,7 @@ description = "Push-to-talk voice transcription. Local, private, free."
 authors = ["Speakeasy contributors"]
 edition = "2021"
 rust-version = "1.88"
-license = "GPL-3.0-only"
+license = "GPL-3.0-or-later"
 repository = "https://github.com/speakeasy-app/speakeasy"
 
 [lib]

@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "description": "Push-to-talk voice transcription. Local, private, free.",
+  "license": "GPL-3.0-only",
   "type": "module",
   "scripts": {
     "dev": "vite",

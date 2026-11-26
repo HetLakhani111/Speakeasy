@@ -197,7 +197,9 @@ mod platform {
             }
         };
 
-        runloop.add_source(&source, kCFRunLoopCommonModes);
+        // The run loop mode constants are `extern static`s, which recent Rust
+        // requires us to touch inside `unsafe`.
+        unsafe { runloop.add_source(&source, kCFRunLoopCommonModes) };
         tap.enable();
 
         if ready.send(Ok(runloop.clone())).is_err() || stopped.load(Ordering::Relaxed) {
@@ -210,7 +212,9 @@ mod platform {
         info!("modifier-only hotkey monitor running");
 
         while !stopped.load(Ordering::Relaxed) {
-            let _ = CFRunLoop::run_in_mode(kCFRunLoopDefaultMode, Duration::from_millis(250), false);
+            let _ = unsafe {
+                CFRunLoop::run_in_mode(kCFRunLoopDefaultMode, Duration::from_millis(250), false)
+            };
         }
 
         drop(source);

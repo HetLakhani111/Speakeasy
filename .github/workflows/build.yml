@@ -23,7 +23,9 @@ jobs:
       matrix:
         include:
           - name: macOS arm64
-            platform: macos-14
+            # macos-14 was retired; current arm64 images are macos-15,
+            # macos-26 and macos-latest (which now points at macOS 26).
+            platform: macos-15
             target_dir: /tmp/speakeasy-target
             bundle: dmg
           - name: Windows x64

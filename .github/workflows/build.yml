@@ -95,8 +95,9 @@ jobs:
           name: speakeasy-${{ matrix.bundle }}
           if-no-files-found: error
           path: |
-            ${{ matrix.target_dir }}/release/bundle/${{ matrix.bundle }}/*
-            ${{ matrix.target_dir }}/release/bundle/msi/*
+            ${{ matrix.target_dir }}/release/bundle/dmg/*.dmg
+            ${{ matrix.target_dir }}/release/bundle/nsis/*.exe
+            ${{ matrix.target_dir }}/release/bundle/msi/*.msi
 
   release:
     name: Publish release
@@ -114,4 +115,31 @@ jobs:
       - uses: softprops/action-gh-release@v2
         with:
           files: artifacts/**/*
+          body: |
+            Local, private push-to-talk dictation. Hold the hotkey, speak,
+            release, and the transcript is pasted into the app you are using.
+
+            **Install**
+
+            - **macOS 11+ (Apple Silicon):** the `.dmg` — open it and drag
+              Speakeasy into Applications.
+            - **Windows 10/11 (x64):** the `-setup.exe` (recommended) or the
+              `.msi` for managed installs.
+
+            **Before you start**
+
+            - The first launch downloads the Whisper model once (~547 MB for
+              the recommended size). After that, everything works offline.
+            - **macOS:** the build is unsigned. Open it once via
+              **System Settings -> Privacy & Security -> Open Anyway**, then
+              grant Microphone, Accessibility and Input Monitoring. Hold `fn`
+              to dictate.
+            - **Windows:** SmartScreen may ask you to confirm the publisher.
+              Hold `Ctrl`+`Space` to dictate.
+
+            No account, no API key, no telemetry. Audio never leaves your
+            machine.
+
+            Setup guide and troubleshooting:
+            https://github.com/HetLakhani111/Speakeasy#readme
           generate_release_notes: true

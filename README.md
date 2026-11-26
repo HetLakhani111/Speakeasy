@@ -16,7 +16,7 @@ makes is the one-time download of the speech model.
 
 ## Download
 
-Grab the latest build from [Releases](https://github.com/speakeasy-app/speakeasy/releases/latest).
+Grab the latest build from [Releases](https://github.com/HetLakhani111/Speakeasy/releases/latest).
 
 | Platform | File | Notes |
 | --- | --- | --- |

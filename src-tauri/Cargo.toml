@@ -6,7 +6,7 @@ authors = ["Speakeasy contributors"]
 edition = "2021"
 rust-version = "1.88"
 license = "GPL-3.0-or-later"
-repository = "https://github.com/speakeasy-app/speakeasy"
+repository = "https://github.com/HetLakhani111/Speakeasy"
 
 [lib]
 name = "speakeasy_lib"
